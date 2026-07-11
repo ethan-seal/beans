@@ -17,18 +17,27 @@
 
           version = self.shortRev or self.dirtyShortRev or "dev";
 
+          pnpmDeps = pkgs.fetchPnpmDeps {
+            pname = "beans-frontend";
+            version = "0.0.1";
+            src = ./frontend;
+            # `pkgs.pnpm` (the fetchPnpmDeps default) floats to whatever pnpm is
+            # "latest" on nixpkgs-unstable, currently pnpm 11, which uses a
+            # SQLite-backed store index that's non-deterministic across fetches
+            # (see NixOS/nixpkgs#522703) and incompatible with the older
+            # file-based store that pnpm_10 (used below) expects. Pin explicitly
+            # so fetch-time and build-time always use the same pnpm.
+            pnpm = pkgs.pnpm_10;
+            hash = "sha256-jvvI97UXo5V4NcoiDUAA3/jRngrce+AZAluRXKJnJAw=";
+            fetcherVersion = 3;
+          };
+
           frontend = pkgs.stdenv.mkDerivation {
             pname = "beans-frontend";
             version = "0.0.1";
             src = ./frontend;
 
-            pnpmDeps = pkgs.fetchPnpmDeps {
-              pname = "beans-frontend";
-              version = "0.0.1";
-              src = ./frontend;
-              hash = "sha256-jvvI97UXo5V4NcoiDUAA3/jRngrce+AZAluRXKJnJAw=";
-              fetcherVersion = 3;
-            };
+            inherit pnpmDeps;
 
             nativeBuildInputs = [
               pkgs.nodejs
