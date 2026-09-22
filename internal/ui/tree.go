@@ -194,10 +194,14 @@ func RenderTree(nodes []*TreeNode, cfg *config.Config, maxIDWidth int, hasTags b
 	cols := CalculateResponsiveColumns(adjustedWidth, hasTags)
 
 	// Calculate title width from remaining space
-	// Account for: tree/ID col, type col, status col, priority symbol (2), space before tags (1)
-	titleWidth := termWidth - treeColWidth - ColWidthType - ColWidthStatus - 3
+	// Account for: tree/ID col, type col, status col, the three single-space
+	// separators between them, and one spare column so a full row stops short
+	// of the last cell (same as dividerWidth below). The priority symbol is not
+	// reserved here -- it lives inside the padded title column.
+	titleWidth := termWidth - treeColWidth - ColWidthType - ColWidthStatus - 4
 	if cols.ShowTags {
-		titleWidth -= cols.Tags
+		// +1 for the space between the title column and the tags column
+		titleWidth -= cols.Tags + 1
 	}
 	if titleWidth < 20 {
 		titleWidth = 20
@@ -209,9 +213,11 @@ func RenderTree(nodes []*TreeNode, cfg *config.Config, maxIDWidth int, hasTags b
 	typeHeader := headerCol.Render("T") + strings.Repeat(" ", ColWidthType-1)
 	statusHeader := headerCol.Render("S") + strings.Repeat(" ", ColWidthStatus-1)
 
-	header := idHeader + typeHeader + statusHeader + headerCol.Render("TITLE")
+	// The single-space separators mirror the ones RenderBeanRow puts between
+	// columns, so the headers line up with the data beneath them.
+	header := idHeader + " " + typeHeader + " " + statusHeader + " " + headerCol.Render("TITLE")
 	if cols.ShowTags && titleWidth > 5 {
-		header += strings.Repeat(" ", titleWidth-5+3) + headerCol.Render("TAGS") // +3 for priority/spacing
+		header += strings.Repeat(" ", titleWidth-5+1) + headerCol.Render("TAGS") // +1 for the space before the tags column
 	}
 	dividerWidth := termWidth - 1 // -1 to avoid wrapping on exact terminal width
 	sb.WriteString(header)
