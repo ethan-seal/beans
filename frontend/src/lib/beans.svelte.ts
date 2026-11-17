@@ -176,7 +176,7 @@ function orderOf(value: string, order: string[], defaultTo?: string): number {
 }
 
 /**
- * Sort beans by status → priority → type → title, matching the backend's
+ * Sort beans by status → priority → type → title → ID, matching the backend's
  * SortByStatusPriorityAndType from internal/bean/sort.go.
  */
 export function sortBeans(beans: Bean[]): Bean[] {
@@ -201,8 +201,12 @@ export function sortBeans(beans: Bean[]): Bean[] {
     d = orderOf(a.type, TYPE_ORDER) - orderOf(b.type, TYPE_ORDER);
     if (d !== 0) return d;
 
-    // Final: title (case-insensitive)
-    return a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+    // Then title (case-insensitive)
+    d = a.title.localeCompare(b.title, undefined, { sensitivity: 'base' });
+    if (d !== 0) return d;
+
+    // Final: ID, matching the backend's tiebreak
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
 }
 

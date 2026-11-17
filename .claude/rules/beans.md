@@ -12,7 +12,7 @@ paths:
 
 Bean sorting must be consistent across the entire system. All places that return lists of beans should use `bean.SortByStatusPriorityAndType()` from `internal/bean/sort.go`. The frontend mirrors this in `sortBeans()` in `frontend/src/lib/beans.svelte.ts`. If you change the sort order, update both.
 
-The sort order is: status → manual order (fractional index) → priority → type → title (case-insensitive).
+The sort order is: status → manual order (fractional index) → priority → type → title (case-insensitive) → ID.
 
 ## Relationship Validation
 

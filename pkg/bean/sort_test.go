@@ -125,6 +125,22 @@ func TestSortByStatusPriorityAndType(t *testing.T) {
 		}
 	})
 
+	t.Run("sorts by id when everything else ties", func(t *testing.T) {
+		beans := []*Bean{
+			{ID: "c", Title: "Same", Status: "todo", Type: "task"},
+			{ID: "a", Title: "same", Status: "todo", Type: "task"},
+			{ID: "b", Title: "SAME", Status: "todo", Type: "task"},
+		}
+
+		SortByStatusPriorityAndType(beans, statusNames, priorityNames, typeNames)
+
+		for i, want := range []string{"a", "b", "c"} {
+			if beans[i].ID != want {
+				t.Errorf("beans[%d].ID = %q, want %q", i, beans[i].ID, want)
+			}
+		}
+	})
+
 	t.Run("handles nil priority names gracefully", func(t *testing.T) {
 		beans := []*Bean{
 			{ID: "1", Title: "A", Status: "todo", Priority: "high"},

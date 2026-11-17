@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// SortByStatusPriorityAndType sorts beans by status order, then priority, then type, then title.
+// SortByStatusPriorityAndType sorts beans by status order, then priority, then type, then title, then ID.
 // This is the default sorting used by both CLI and TUI.
 // Unrecognized statuses, priorities, and types are sorted last within their category.
 // Beans without priority are treated as "normal" priority for sorting purposes.
@@ -81,7 +81,13 @@ func SortByStatusPriorityAndType(beans []*Bean, statusNames, priorityNames, type
 		if ti != tj {
 			return ti < tj
 		}
-		// Final: title (case-insensitive) for stable, user-friendly ordering
-		return strings.ToLower(beans[i].Title) < strings.ToLower(beans[j].Title)
+		// Then title (case-insensitive) for user-friendly ordering
+		li, lj := strings.ToLower(beans[i].Title), strings.ToLower(beans[j].Title)
+		if li != lj {
+			return li < lj
+		}
+		// Final: ID, so beans that tie on everything else keep the same order on every run
+		// (callers often pass beans in map iteration order, which Go randomizes)
+		return beans[i].ID < beans[j].ID
 	})
 }

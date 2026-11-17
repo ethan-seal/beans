@@ -74,6 +74,25 @@ func TestSortBeans(t *testing.T) {
 		}
 	})
 
+	// Timestamps are stored to the second, so equal timestamps are common
+	for _, sortBy := range []string{"created", "updated"} {
+		t.Run("sort by "+sortBy+" breaks ties by id", func(t *testing.T) {
+			beans := []*bean.Bean{
+				{ID: "c3", CreatedAt: &now, UpdatedAt: &now},
+				{ID: "old", CreatedAt: &earlier, UpdatedAt: &earlier},
+				{ID: "a1", CreatedAt: &now, UpdatedAt: &now},
+				{ID: "b2", CreatedAt: &now, UpdatedAt: &now},
+			}
+			sortBeans(beans, sortBy, testCfg)
+
+			for i, want := range []string{"a1", "b2", "c3", "old"} {
+				if beans[i].ID != want {
+					t.Errorf("sort by %s[%d]: got %q, want %q", sortBy, i, beans[i].ID, want)
+				}
+			}
+		})
+	}
+
 	t.Run("sort by status", func(t *testing.T) {
 		beans := []*bean.Bean{
 			{ID: "c1", Status: "completed"},

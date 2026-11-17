@@ -213,7 +213,11 @@ func sortBeans(beans []*bean.Bean, sortBy string, cfg *config.Config) {
 			if beans[j].CreatedAt == nil {
 				return true
 			}
-			return beans[i].CreatedAt.After(*beans[j].CreatedAt)
+			// Timestamps are stored to the second, so beans created together tie; fall back to ID
+			if !beans[i].CreatedAt.Equal(*beans[j].CreatedAt) {
+				return beans[i].CreatedAt.After(*beans[j].CreatedAt)
+			}
+			return beans[i].ID < beans[j].ID
 		})
 	case "updated":
 		sort.Slice(beans, func(i, j int) bool {
@@ -226,7 +230,10 @@ func sortBeans(beans []*bean.Bean, sortBy string, cfg *config.Config) {
 			if beans[j].UpdatedAt == nil {
 				return true
 			}
-			return beans[i].UpdatedAt.After(*beans[j].UpdatedAt)
+			if !beans[i].UpdatedAt.Equal(*beans[j].UpdatedAt) {
+				return beans[i].UpdatedAt.After(*beans[j].UpdatedAt)
+			}
+			return beans[i].ID < beans[j].ID
 		})
 	case "status":
 		// Build status order from configured statuses
